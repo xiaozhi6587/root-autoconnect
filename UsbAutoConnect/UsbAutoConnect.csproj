@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>net471;net10.0-windows</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>RootAutoConnect</AssemblyName>
+    <Product>root包 逆向自动连接助手</Product>
+    <Title>root包 逆向自动连接助手</Title>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.5.1</Version>
+  </PropertyGroup>
+  <ItemGroup><Resource Include="Assets\app.ico"/><Resource Include="Assets\palette.json"/></ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'"><Reference Include="System.Web.Extensions"/><Reference Include="System.Web"/><Reference Include="Microsoft.CSharp"/><Reference Include="System.Net.Http"/></ItemGroup>
+</Project>

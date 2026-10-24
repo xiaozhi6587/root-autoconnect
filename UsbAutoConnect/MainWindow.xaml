@@ -1,0 +1,97 @@
+<local:MacWindow x:Class="UsbAutoConnect.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:UsbAutoConnect"
+        Title="root包 逆向自动连接助手" Width="850" Height="420" MinWidth="720" MinHeight="360" WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource ToneF5F5F7}" Foreground="{DynamicResource Tone242426}" FontFamily="Microsoft YaHei UI" FontSize="12" Loaded="Window_Loaded" Closing="Window_Closing">
+  <local:MacWindow.Resources>
+    <Style x:Key="CellText" TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/></Style>
+  </local:MacWindow.Resources>
+  <Grid Margin="10,8">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <DockPanel LastChildFill="True">
+      <Button x:Name="StartButton" DockPanel.Dock="Left" Content="▶ 开始自动连接" Style="{StaticResource AccentButton}" Click="StartStop_Click" Margin="0,0,6,0"/>
+      <Button x:Name="ScanButton" DockPanel.Dock="Left" Content="扫描" Click="Scan_Click" Margin="0,0,10,0" ToolTip="只读取设备列表，不连接设备"/>
+      <Button x:Name="ThemeButton" DockPanel.Dock="Right" Width="30" Height="30" Padding="5" Margin="6,0,0,0" Click="Theme_Click" ToolTip="切换深色模式" AutomationProperties.Name="切换深色模式">
+        <Grid x:Name="ThemeIcon" Width="18" Height="18" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform x:Name="ThemeRotation"/></Grid.RenderTransform>
+          <Path x:Name="MoonIcon" Data="M16.4,10.2 A7.3,7.3 0 0 1 7.8,1.6 A7.7,7.7 0 1 0 16.4,10.2 Z" Fill="{DynamicResource Tone6E6E73}"/>
+          <Path x:Name="SunIcon" Data="M9,5 A4,4 0 1 1 8.99,5 M9,0 L9,2 M9,16 L9,18 M0,9 L2,9 M16,9 L18,9 M2.6,2.6 L4,4 M14,14 L15.4,15.4 M2.6,15.4 L4,14 M14,4 L15.4,2.6" Stroke="{DynamicResource Tone6E6E73}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Opacity="0"/>
+        </Grid>
+      </Button>
+      <Button x:Name="ManageButton" DockPanel.Dock="Right" Content="排除管理 (0)" Click="ManageExclusions_Click" Margin="8,0,0,0"/>
+      <TextBlock DockPanel.Dock="Left" Text="筛选" VerticalAlignment="Center" Foreground="{DynamicResource Tone6E6E73}" Margin="0,0,6,0"/>
+      <TextBox x:Name="FilterBox" IsEnabled="{Binding IsEnabled, ElementName=Configuration}" ToolTip="按名称、VID、PID、序列号、端口或地址筛选；留空匹配全部。"/>
+    </DockPanel>
+    <Expander Grid.Row="1" x:Name="SettingsExpander" Header="连接设置" Foreground="{DynamicResource Tone6E6E73}" Margin="0,5,0,3" Padding="0" IsExpanded="False" Expanded="Settings_Expanded">
+      <Grid x:Name="Configuration" Margin="0,5,0,6">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock Text="程序路径" Foreground="{DynamicResource Tone6E6E73}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+        <TextBox Grid.Column="1" x:Name="PathBox" ToolTip="技师版安装目录中的 usbtechsh.exe"/>
+        <StackPanel Grid.Column="2" Orientation="Horizontal"><Button x:Name="LocateButton" Content="自动定位" Click="Locate_Click" Margin="6,0,0,0"/><Button Content="浏览…" Click="Browse_Click" Margin="6,0,0,0"/></StackPanel>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,6,0,0">
+          <TextBlock Text="扫描间隔" Foreground="{DynamicResource Tone6E6E73}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+          <TextBox x:Name="IntervalBox" Text="2" Width="48"/><TextBlock Text="秒" VerticalAlignment="Center" Margin="6,0,18,0"/>
+          <TextBlock Text="重试间隔" Foreground="{DynamicResource Tone6E6E73}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+          <TextBox x:Name="RetryBox" Text="15" Width="48"/><TextBlock Text="秒" VerticalAlignment="Center" Margin="6,0,0,0"/>
+        </StackPanel>
+      </Grid>
+    </Expander>
+    <DockPanel Grid.Row="2" Margin="2,2,2,6">
+      <Border x:Name="StateBadge" DockPanel.Dock="Right" Background="{DynamicResource ToneE8E9ED}" CornerRadius="5" Padding="7,2"><TextBlock x:Name="StateText" Text="● 已暂停" Foreground="{DynamicResource Tone6E6E73}" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/></Border>
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="设备 " Foreground="{DynamicResource Tone6E6E73}"/><TextBlock x:Name="TotalText" Text="0" FontWeight="SemiBold" Margin="0,0,16,0"/>
+        <TextBlock Text="已连接 " Foreground="{DynamicResource Tone6E6E73}"/><TextBlock x:Name="ConnectedText" Text="0" Foreground="{DynamicResource Tone18713D}" FontWeight="SemiBold" Margin="0,0,16,0"/>
+        <TextBlock Text="可连接 " Foreground="{DynamicResource Tone6E6E73}"/><TextBlock x:Name="AvailableText" Text="0" Foreground="{DynamicResource Tone0862C7}" FontWeight="SemiBold"/>
+      </StackPanel>
+    </DockPanel>
+    <Border Grid.Row="3" Background="{DynamicResource ToneFFFFFF}" BorderBrush="{DynamicResource ToneD9DAE1}" BorderThickness="1" CornerRadius="4">
+      <Grid>
+        <DataGrid x:Name="DevicesGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" HeadersVisibility="Column" GridLinesVisibility="None" BorderThickness="0" Background="{DynamicResource ToneFFFFFF}" RowBackground="{DynamicResource ToneFFFFFF}" AlternatingRowBackground="{DynamicResource ToneF7F8FA}" Foreground="{DynamicResource Tone242426}" SelectionMode="Single" SelectionUnit="FullRow" HorizontalScrollBarVisibility="Auto" RowHeight="28" ColumnHeaderHeight="28" ToolTip="右键设备可排除、恢复自动连接或查看详细信息">
+          <DataGrid.RowStyle><Style TargetType="DataGridRow" BasedOn="{StaticResource MacRow}">
+            <EventSetter Event="PreviewMouseRightButtonDown" Handler="DeviceRow_RightClick"/>
+            <EventSetter Event="Loaded" Handler="DeviceRow_Loaded"/>
+          </Style></DataGrid.RowStyle>
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="编号" Binding="{Binding Id}" Width="48"/>
+            <DataGridTextColumn Header="设备" Binding="{Binding Name}" Width="*" MinWidth="135" ElementStyle="{StaticResource CellText}"/>
+            <DataGridTemplateColumn Header="状态" CellTemplate="{StaticResource DeviceStatus}" SortMemberPath="Status" Width="66"/>
+            <DataGridTemplateColumn Header="自动连接" CellTemplate="{StaticResource DevicePolicy}" SortMemberPath="IsExcluded" Width="88"/>
+            <DataGridTextColumn Header="VID:PID" Binding="{Binding Hardware}" Width="84"/>
+            <DataGridTextColumn Header="USB口" Binding="{Binding Port}" Width="58" ElementStyle="{StaticResource CellText}"/>
+            <DataGridTextColumn Header="远程地址" Binding="{Binding Server}" Width="150" ElementStyle="{StaticResource CellText}"/>
+          </DataGrid.Columns>
+        </DataGrid>
+        <TextBlock x:Name="EmptyText" Text="暂无远程设备，请先让客户接入技师端。" Foreground="{DynamicResource Tone777780}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" IsHitTestVisible="False" Margin="12,28,12,0"/>
+      </Grid>
+    </Border>
+    <Expander Grid.Row="4" x:Name="LogExpander" IsExpanded="True" Foreground="{DynamicResource Tone6E6E73}" Margin="0,5,0,0" HorizontalContentAlignment="Stretch" Expanded="Log_Expanded">
+      <Expander.Header>
+        <DockPanel Width="{Binding ActualWidth, ElementName=LogHeaderWidth}">
+          <TextBlock Text="日志" FontWeight="SemiBold" Margin="0,0,10,0"/>
+          <TextBlock x:Name="LatestLogText" Text="就绪" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Tone777780}"/>
+        </DockPanel>
+      </Expander.Header>
+      <Border BorderBrush="{DynamicResource ToneDCDDE3}" BorderThickness="1" CornerRadius="6" Background="{DynamicResource ToneFFFFFF}" Margin="0,3,0,0">
+        <ListBox x:Name="LogBox" Height="108" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" FontSize="14" FontFamily="Cascadia Mono, Consolas, Microsoft YaHei UI" Padding="5,3" HorizontalContentAlignment="Stretch">
+          <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="LogRow" Background="Transparent" CornerRadius="4" Padding="3,4"><ContentPresenter/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="LogRow" Property="Background" Value="{DynamicResource ToneEAF2FF}"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style></ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="72"/><ColumnDefinition Width="46"/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Time}" Foreground="{DynamicResource Tone8B8B94}" FontSize="12" VerticalAlignment="Top" Margin="0,2,0,0"/>
+            <Border Grid.Column="1" Background="{Binding Background, Converter={StaticResource ThemeBrush}}" CornerRadius="4" Padding="4,2" HorizontalAlignment="Left" VerticalAlignment="Top"><TextBlock Text="{Binding Level}" Foreground="{Binding Color, Converter={StaticResource ThemeBrush}}" FontSize="11" FontWeight="SemiBold"/></Border>
+            <TextBlock Grid.Column="2" Text="{Binding Message}" Foreground="{Binding Color, Converter={StaticResource ThemeBrush}}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="2,0,0,0"/>
+          </Grid></DataTemplate></ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
+    </Expander>
+    <Grid Grid.Row="5" Margin="0,4,0,0">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <TextBlock x:Name="UpdatedText" Text="尚未扫描" Foreground="{DynamicResource Tone777780}" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+      <TextBlock Grid.Column="1" x:Name="VersionText" Foreground="{DynamicResource Tone777780}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+      <StackPanel Grid.Column="2" Orientation="Horizontal">
+        <TextBlock x:Name="RequestText" Text="请求 0 次" Foreground="{DynamicResource Tone777780}" FontSize="11" VerticalAlignment="Center" Margin="6,0"/>
+        <Button Content="原始输出" Click="Raw_Click" Style="{StaticResource LinkButton}"/>
+        <Button Content="日志目录" Click="Logs_Click" Style="{StaticResource LinkButton}"/>
+      </StackPanel>
+    </Grid>
+    <Border x:Name="LogHeaderWidth" Grid.Row="4" Margin="52,0,0,0" Height="0" VerticalAlignment="Top" IsHitTestVisible="False"/>
+  </Grid>
+</local:MacWindow>
+
+
