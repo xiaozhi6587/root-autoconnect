@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+.vs/
+.idea/
+发布/
+*.user
+*.suo
+*.pdb
+*.log
+Thumbs.db
+Desktop.ini
