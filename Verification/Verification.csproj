@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFrameworks>net471;net10.0-windows</TargetFrameworks><LangVersion>latest</LangVersion><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup><Compile Include="..\UsbAutoConnect\Models.cs" Link="Models.cs"/><Compile Include="..\UsbAutoConnect\DeviceExclusion.cs" Link="DeviceExclusion.cs"/><Compile Include="..\UsbAutoConnect\Settings.cs" Link="Settings.cs"/><Compile Include="..\UsbAutoConnect\ToolLocator.cs" Link="ToolLocator.cs"/><Compile Include="..\UsbAutoConnect\RedirectorClient.cs" Link="RedirectorClient.cs"/><Compile Remove="FakeTool\**\*.cs"/></ItemGroup>
+  <ItemGroup><Compile Include="..\UsbAutoConnect\Compatibility.cs" Link="Compatibility.cs"/><Compile Include="..\UsbAutoConnect\JsonData.cs" Link="JsonData.cs"/><Compile Include="..\UsbAutoConnect\ProcessTree.cs" Link="ProcessTree.cs"/></ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'"><Reference Include="System.Web.Extensions"/><Reference Include="System.Web"/><Reference Include="Microsoft.CSharp"/><Reference Include="System.Net.Http"/></ItemGroup>
+</Project>
